@@ -1,0 +1,19 @@
+{
+  "name": "discord",
+  "version": "1.0.0",
+  "description": "For displaying Discord messages.",
+  "keywords": [
+    "discord",
+    "node"
+  ],
+  "license": "ISC",
+  "author": "Alex Otten",
+  "type": "esm",
+  "main": "discord.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

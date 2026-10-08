@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Node Server</title>
+</head>
+
+<body>
+    <script>
+        async function fetchList() {
+            try {
+                const response = await fetch('http://localhost:3000/list');
+                // CRITICAL: Always check response.ok. 
+                // Fetch does NOT reject on HTTP errors like 404 or 500!
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data
+            } catch (error) {
+                console.error('Network or parsing error:', error);
+            }
+        }
+        async function fetchFolders() {
+            try {
+                const response = await fetch('http://localhost:3000/folders');
+                // CRITICAL: Always check response.ok. 
+                // Fetch does NOT reject on HTTP errors like 404 or 500!
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data
+            } catch (error) {
+                console.error('Network or parsing error:', error);
+            }
+        }
+        async function fetchConversation(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/conversation/${id}`);
+                // CRITICAL: Always check response.ok. 
+                // Fetch does NOT reject on HTTP errors like 404 or 500!
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data
+            } catch (error) {
+                console.error('Network or parsing error:', error);
+            }
+        }
+    </script>
+    <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+    }
+  }
+</script>
+
+    <div id="app">
+        <dialog id="my-dialog">
+            <button commandfor="my-dialog" command="close">Close</button>
+            <p>{{store.selectedConversationName}}</p>
+            <li v-for="conversation in store.selectedConversation">
+                {{conversation.Contents}}
+            </li>
+        </dialog>
+        <h1>{{ message }}</h1>
+        <li v-for="(conversation, index) in conversations">
+            <button command="show-modal" commandfor="my-dialog" href="#" @click="showFolder(conversation, index)">{{
+                conversation }}</button>
+        </li>
+    </div>
+
+    <script type="module">
+        import { createApp, ref, reactive } from 'vue'
+
+        const conversations = await fetchList()
+        const folders = await fetchFolders()
+
+        export const store = reactive({
+            selectedConversationName: '',
+            selectedConversation: [],
+            increment() {
+                this.count++
+            }
+        })
+
+        async function showFolder(conversation, index) {
+            const record = await fetchConversation(index)
+            store.selectedConversationName = conversation
+            store.selectedConversation = record
+            console.info('folder clicked', record, conversation)
+        }
+
+        createApp({
+            setup() {
+                const message = ref('Hello Vue!')
+                return {
+                    message,
+                    conversations,
+                    folders,
+                    showFolder,
+                    store
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
