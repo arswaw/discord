@@ -9,57 +9,12 @@
 </head>
 
 <body>
-    <script>
-        async function fetchList() {
-            try {
-                const response = await fetch('http://localhost:3000/list');
-                // CRITICAL: Always check response.ok. 
-                // Fetch does NOT reject on HTTP errors like 404 or 500!
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data
-            } catch (error) {
-                console.error('Network or parsing error:', error);
-            }
-        }
-        async function fetchFolders() {
-            try {
-                const response = await fetch('http://localhost:3000/folders');
-                // CRITICAL: Always check response.ok. 
-                // Fetch does NOT reject on HTTP errors like 404 or 500!
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data
-            } catch (error) {
-                console.error('Network or parsing error:', error);
-            }
-        }
-        async function fetchConversation(id) {
-            try {
-                const response = await fetch(`http://localhost:3000/conversation/${id}`);
-                // CRITICAL: Always check response.ok. 
-                // Fetch does NOT reject on HTTP errors like 404 or 500!
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data
-            } catch (error) {
-                console.error('Network or parsing error:', error);
-            }
-        }
-    </script>
     <script type="importmap">
   {
     "imports": {
-      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "vue": "https://unpkg.com/vue@3.5.43/dist/vue.esm-browser.js",
+      "vue-router": "https://cdnjs.cloudflare.com/ajax/libs/vue-router/5.4.0/vue-router.esm-browser.prod.js",
+      "@vue/devtools-api": "https://unpkg.com/@vue/devtools-api@8.2.1/dist/vue-devtools-api.esm-browser.js",
       "NavBarComponent": "./components/NavBarComponent.js",
       "LoadingComponent": "./components/LoadingComponent.js",
       "PersistentComponent": "./components/PersistentComponent.js",
@@ -67,142 +22,13 @@
       "useMouse": "./composables/mouse.js",
       "useFetch": "./composables/fetch.js",
       "i18nPlugin": "./plugins/i18n.js",
-      "injection-keys": "./injection-keys.js"
+      "injection-keys": "./injection-keys.js",
+      "router": "./router.js"
     }
   }
 </script>
-
-    <div id="app">
-        <navbar :links="store.nav.links"></navbar>
-        <dialog id="my-dialog">
-            <button commandfor="my-dialog" command="close">Close</button>
-            <p>{{store.selectedConversationName}}</p>
-            <li v-for="conversation in store.selectedConversation">
-                {{conversation.Contents}}
-            </li>
-        </dialog>
-        <h1>{{ message }}</h1>
-        <p highlight>This sentence is important!</p>
-        <button @click="switchLanguage">Switch Languages</button>
-        <h1>{{ $t(currentLanguage, 'greetings') }}</h1>
-        <h1>{{ $t(currentLanguage, 'farewells') }}</h1>
-        <button @click="showTransition = !showTransition">Toggle</button>
-        <Transition>
-            <p v-if="showTransition">hello</p>
-        </Transition><br>
-        <KeepAlive>
-            <persistent :is="showTransition"></persistent>
-        </KeepAlive>
-        <test text="Comment Identifiers." :ids="store.test.ids">
-            Mouse position is at: {{ x }}, {{ y }}
-        </test>
-        <div class="container">
-            <li class="grid-item" v-for="(conversation, index) in conversations">
-                <h3>{{conversation}}</h3>
-                <button command="show-modal" commandfor="my-dialog" href="#"
-                    @click="showFolder(conversation, index)">Open</button>
-            </li>
-        </div>
-    </div>
-
-    <script type="module">
-        import { createApp, ref, reactive, provide, defineAsyncComponent } from 'vue'
-        import { useMouse } from 'useMouse'
-        import { useFetch } from 'useFetch'
-        import i18nPlugin from 'i18nPlugin'
-        import { myInjectionKey } from 'injection-keys'
-        import NavBarComponent from 'NavBarComponent'
-        import LoadingComponent from 'LoadingComponent'
-        import PersistentComponent from 'PersistentComponent'
-        import ErrorComponent from 'ErrorComponent'
-
-        const conversations = await fetchList()
-        const folders = await fetchFolders()
-
-        const currentLanguage = ref('en')
-
-        const showTransition = ref(false)
-
-        function switchLanguage() {
-            currentLanguage.value = currentLanguage.value === 'en' ? 'es' : 'en'
-        }
-
-        const store = reactive({
-            selectedConversationName: '',
-            selectedConversation: [],
-            test: {
-                "ids": [234, 266, 273]
-            },
-            providerText: "This content was provided from Vue provider.",
-            nav: {
-                links: [
-                    {
-                        display: "Home",
-                        link: "#home"
-                    },
-                    {
-                        display: "News",
-                        link: "#news"
-                    },
-                    {
-                        display: "Contact",
-                        link: "#contact"
-                    },
-                    {
-                        display: "About",
-                        link: "#about"
-                    }
-                ]
-            },
-            increment() {
-                this.count++
-            }
-        })
-
-        async function showFolder(conversation, index) {
-            const record = await fetchConversation(index)
-            store.selectedConversationName = conversation
-            store.selectedConversation = record
-            console.info('folder clicked', record, conversation)
-        }
-
-        createApp({
-            setup() {
-                provide(myInjectionKey, store.providerText)
-                const message = ref('Discord Conversations')
-                const { x, y } = useMouse()
-                const { data, error } = useFetch('https://api.github.com/users/hadley/orgs')
-                return {
-                    message,
-                    conversations,
-                    folders,
-                    showFolder,
-                    store,
-                    x, y,
-                    switchLanguage,
-                    currentLanguage,
-                    showTransition
-                }
-            },
-            directives: {
-                highlight: {
-                    mounted: (el) => {
-                        el.classList.add('highlight')
-                    }
-                }
-            }
-        })
-            .component('test', defineAsyncComponent({
-                loader: () => import('./components/TestComponent.js'),
-                loadingComponent: LoadingComponent,
-                errorComponent: ErrorComponent,
-                timeout: 3000
-            }))
-            .component('navbar', NavBarComponent)
-            .component('persistent', PersistentComponent)
-            .use(i18nPlugin)
-            .mount('#app')
-    </script>
+    <div id="app"></div>
+    <script type="module" src="./app.js"></script>
 </body>
 
 </html>

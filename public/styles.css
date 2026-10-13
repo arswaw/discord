@@ -18,6 +18,17 @@ body {
   opacity: 0;
 }
 
+.modal {
+  position: fixed;
+  z-index: 999;
+  top: 20%;
+  left: 50%;
+  width: 300px;
+  margin-left: -150px;
+  background-color: aquamarine;
+  border-radius: 10px;
+}
+
 .container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);

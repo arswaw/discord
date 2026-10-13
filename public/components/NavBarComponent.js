@@ -3,7 +3,7 @@ export default {
     template: `
     <nav>
         <li v-for="link in links">
-            <a :href="link.link">{{link.display}}</a>
+            <a><RouterLink :to="link.link">{{link.display}}</RouterLink></a>
         </li>
     </nav>
     `
