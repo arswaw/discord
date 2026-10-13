@@ -3,6 +3,9 @@
 
 <head>
     <title>Node Server</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="uaplus.css">
 </head>
 
 <body>
@@ -56,7 +59,8 @@
     <script type="importmap">
   {
     "imports": {
-      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "TestComponent": "./components/TestComponent.js"
     }
   }
 </script>
@@ -70,14 +74,18 @@
             </li>
         </dialog>
         <h1>{{ message }}</h1>
-        <li v-for="(conversation, index) in conversations">
-            <button command="show-modal" commandfor="my-dialog" href="#" @click="showFolder(conversation, index)">{{
-                conversation }}</button>
-        </li>
+        <test text="Comment Identifiers." :ids="store.test.ids"/>
+        <div class="container">
+            <li class="grid-item" v-for="(conversation, index) in conversations">
+                <h3>{{conversation}}</h3>
+                <button command="show-modal" commandfor="my-dialog" href="#" @click="showFolder(conversation, index)">Open</button>
+            </li>
+        </div>
     </div>
 
     <script type="module">
         import { createApp, ref, reactive } from 'vue'
+        import TestComponent from 'TestComponent'
 
         const conversations = await fetchList()
         const folders = await fetchFolders()
@@ -85,6 +93,9 @@
         export const store = reactive({
             selectedConversationName: '',
             selectedConversation: [],
+            test: {
+                "ids": [234, 266, 273]
+            },
             increment() {
                 this.count++
             }
@@ -99,7 +110,7 @@
 
         createApp({
             setup() {
-                const message = ref('Hello Vue!')
+                const message = ref('Discord Conversations')
                 return {
                     message,
                     conversations,
@@ -108,7 +119,9 @@
                     store
                 }
             }
-        }).mount('#app')
+        })
+        .component('test', TestComponent)
+        .mount('#app')
     </script>
 </body>
 

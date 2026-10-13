@@ -1,0 +1,19 @@
+.container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-item {
+    list-style-type: none;
+    border: 1px solid blue;
+    padding: 15px;
+}
+
+dialog {
+    position: sticky;
+    top: 0;
+}
+
+dialog:modal {
+    overlay: none;
+}

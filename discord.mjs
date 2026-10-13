@@ -4,6 +4,9 @@ import path from 'path';
 const app = express()
 const port = 3000
 
+// Create static folder for CSS, Vue components, etc.
+app.use(express.static('public'));
+
 const folders = await readdir(`${import.meta.dirname}/messages`)
 
 app.get('/', (req, res) => {
