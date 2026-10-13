@@ -65,6 +65,7 @@
       "ErrorComponent": "./components/ErrorComponent.js",
       "useMouse": "./composables/mouse.js",
       "useFetch": "./composables/fetch.js",
+      "i18nPlugin": "./plugins/i18n.js",
       "injection-keys": "./injection-keys.js"
     }
   }
@@ -81,6 +82,13 @@
         </dialog>
         <h1>{{ message }}</h1>
         <p highlight>This sentence is important!</p>
+        <button @click="switchLanguage">Switch Languages</button>
+        <h1>{{ $t(currentLanguage, 'greetings') }}</h1>
+        <h1>{{ $t(currentLanguage, 'farewells') }}</h1>
+        <button @click="showTransition = !showTransition">Toggle</button>
+        <Transition>
+            <p v-if="showTransition">hello</p>
+        </Transition>
         <test text="Comment Identifiers." :ids="store.test.ids">
             Mouse position is at: {{ x }}, {{ y }}
         </test>
@@ -97,6 +105,7 @@
         import { createApp, ref, reactive, provide, defineAsyncComponent } from 'vue'
         import { useMouse } from 'useMouse'
         import { useFetch } from 'useFetch'
+        import i18nPlugin from 'i18nPlugin'
         import { myInjectionKey } from 'injection-keys'
         import NavBarComponent from 'NavBarComponent'
         import LoadingComponent from 'LoadingComponent'
@@ -105,7 +114,15 @@
         const conversations = await fetchList()
         const folders = await fetchFolders()
 
-        export const store = reactive({
+        const currentLanguage = ref('en')
+
+        const showTransition = ref(false)
+
+        function switchLanguage() {
+            currentLanguage.value = currentLanguage.value === 'en' ? 'es' : 'en'
+        }
+
+        const store = reactive({
             selectedConversationName: '',
             selectedConversation: [],
             test: {
@@ -156,7 +173,10 @@
                     folders,
                     showFolder,
                     store,
-                    x, y
+                    x, y,
+                    switchLanguage,
+                    currentLanguage,
+                    showTransition
                 }
             },
             directives: {
@@ -174,6 +194,7 @@
                 timeout: 3000
             }))
             .component('navbar', NavBarComponent)
+            .use(i18nPlugin)
             .mount('#app')
     </script>
 </body>
