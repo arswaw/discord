@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Node Server</title>
+    <title>Discord Conversations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="uaplus.css">
@@ -60,12 +60,14 @@
   {
     "imports": {
       "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-      "TestComponent": "./components/TestComponent.js"
+      "TestComponent": "./components/TestComponent.js",
+      "NavBarComponent": "./components/NavBarComponent.js"
     }
   }
 </script>
 
     <div id="app">
+        <navbar :links="store.nav.links"></navbar>
         <dialog id="my-dialog">
             <button commandfor="my-dialog" command="close">Close</button>
             <p>{{store.selectedConversationName}}</p>
@@ -74,11 +76,12 @@
             </li>
         </dialog>
         <h1>{{ message }}</h1>
-        <test text="Comment Identifiers." :ids="store.test.ids"/>
+        <test text="Comment Identifiers." :ids="store.test.ids"></test>
         <div class="container">
             <li class="grid-item" v-for="(conversation, index) in conversations">
                 <h3>{{conversation}}</h3>
-                <button command="show-modal" commandfor="my-dialog" href="#" @click="showFolder(conversation, index)">Open</button>
+                <button command="show-modal" commandfor="my-dialog" href="#"
+                    @click="showFolder(conversation, index)">Open</button>
             </li>
         </div>
     </div>
@@ -86,6 +89,7 @@
     <script type="module">
         import { createApp, ref, reactive } from 'vue'
         import TestComponent from 'TestComponent'
+        import NavBarComponent from 'NavBarComponent'
 
         const conversations = await fetchList()
         const folders = await fetchFolders()
@@ -95,6 +99,26 @@
             selectedConversation: [],
             test: {
                 "ids": [234, 266, 273]
+            },
+            nav: {
+                links: [
+                    {
+                        display: "Home",
+                        link: "#home"
+                    },
+                    {
+                        display: "News",
+                        link: "#news"
+                    },
+                    {
+                        display: "Contact",
+                        link: "#contact"
+                    },
+                    {
+                        display: "About",
+                        link: "#about"
+                    }
+                ]
             },
             increment() {
                 this.count++
@@ -120,8 +144,9 @@
                 }
             }
         })
-        .component('test', TestComponent)
-        .mount('#app')
+            .component('test', TestComponent)
+            .component('navbar', NavBarComponent)
+            .mount('#app')
     </script>
 </body>
 
