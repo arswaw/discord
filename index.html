@@ -60,8 +60,12 @@
   {
     "imports": {
       "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
-      "TestComponent": "./components/TestComponent.js",
-      "NavBarComponent": "./components/NavBarComponent.js"
+      "NavBarComponent": "./components/NavBarComponent.js",
+      "LoadingComponent": "./components/LoadingComponent.js",
+      "ErrorComponent": "./components/ErrorComponent.js",
+      "useMouse": "./composables/mouse.js",
+      "useFetch": "./composables/fetch.js",
+      "injection-keys": "./injection-keys.js"
     }
   }
 </script>
@@ -76,7 +80,10 @@
             </li>
         </dialog>
         <h1>{{ message }}</h1>
-        <test text="Comment Identifiers." :ids="store.test.ids"></test>
+        <p highlight>This sentence is important!</p>
+        <test text="Comment Identifiers." :ids="store.test.ids">
+            Mouse position is at: {{ x }}, {{ y }}
+        </test>
         <div class="container">
             <li class="grid-item" v-for="(conversation, index) in conversations">
                 <h3>{{conversation}}</h3>
@@ -87,9 +94,13 @@
     </div>
 
     <script type="module">
-        import { createApp, ref, reactive } from 'vue'
-        import TestComponent from 'TestComponent'
+        import { createApp, ref, reactive, provide, defineAsyncComponent } from 'vue'
+        import { useMouse } from 'useMouse'
+        import { useFetch } from 'useFetch'
+        import { myInjectionKey } from 'injection-keys'
         import NavBarComponent from 'NavBarComponent'
+        import LoadingComponent from 'LoadingComponent'
+        import ErrorComponent from 'ErrorComponent'
 
         const conversations = await fetchList()
         const folders = await fetchFolders()
@@ -100,6 +111,7 @@
             test: {
                 "ids": [234, 266, 273]
             },
+            providerText: "This content was provided from Vue provider.",
             nav: {
                 links: [
                     {
@@ -134,17 +146,33 @@
 
         createApp({
             setup() {
+                provide(myInjectionKey, store.providerText)
                 const message = ref('Discord Conversations')
+                const { x, y } = useMouse()
+                const { data, error } = useFetch('https://api.github.com/users/hadley/orgs')
                 return {
                     message,
                     conversations,
                     folders,
                     showFolder,
-                    store
+                    store,
+                    x, y
+                }
+            },
+            directives: {
+                highlight: {
+                    mounted: (el) => {
+                        el.classList.add('highlight')
+                    }
                 }
             }
         })
-            .component('test', TestComponent)
+            .component('test', defineAsyncComponent({
+                loader: () => import('./components/TestComponent.js'),
+                loadingComponent: LoadingComponent,
+                errorComponent: ErrorComponent,
+                timeout: 3000
+            }))
             .component('navbar', NavBarComponent)
             .mount('#app')
     </script>
